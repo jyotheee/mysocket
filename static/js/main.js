@@ -21,55 +21,88 @@ var sdpConstraints = {'mandatory': {
 /////////////////////////////////////////////
 
 var room = location.pathname.substring(1);
-if (room === '') {
+if (room === '' || room === null) {
 //  room = prompt('Enter room name:');
   room = 'foo';
-} else {
-  //
-}
+} 
 
-//var socket = io.connect();
+var namespace = '/test';
+var socket = null;
+$("#socketButton").click(function(clickEvt) {
+  console.log("Clicked start");
+  socket = io.connect('http://' + document.domain + ':' + location.port + namespace);
 
-var namespace = '/test'; 
-var socket = io.connect('http://' + document.domain + ':' + location.port + namespace);
+  socket.on('log', function (data){
+    console.log(data);
+  });
 
-//socket.on('connect', function() {
-//            console.log('Initiating a connection from browser to server');
-//            socket.emit('create or join', {'room': room});
-//});
+  socket.on('my response', function () {
+    if (room !== '') {
+      console.log('Create or join room', room);
+      socket.emit('create or join room', {'room': room } );
+    }
+  });
 
-socket.on('my response', function(data) {
-            console.log(data);
-});
+  socket.on('created', function (room){
+    console.log('Created room ' + room);
+    isInitiator = true;
+  });
 
-socket.on('log', function (data){
-            console.log(data);
-});
-          
+  socket.on('full', function (room){
+    console.log('Room ' + room + ' is full');
+  });
 
-if (room !== '') {
-  console.log('Create or join room', room);
-  socket.emit('create or join room', {'room':room});
-}
+  socket.on('join', function (message){
+    console.log('Another peer made a request to join room ' + message['room']);
+    console.log('This peer is the initiator of room ' + message['room'] + '!');
+    isChannelReady = true;
+  });
 
-socket.on('created', function (room){
-  console.log('Created room ' + room);
-  isInitiator = true;
-});
+  socket.on('joined', function (message){
+    console.log('This peer has joined room ' + message['room']);
+    isChannelReady = true;
+  });
 
-socket.on('full', function (room){
-  console.log('Room ' + room + ' is full');
-});
+  socket.on('get media', function() {
+    console.log('Received get media from server');
+    if(typeof localStream == 'undefined') {
+      console.log('Getting local stream');
+      startLocalVideo();
+    }
+  });
 
-socket.on('join', function (message){
-  console.log('Another peer made a request to join room ' + message['room']);
-  console.log('This peer is the initiator of room ' + message['room'] + '!');
-  isChannelReady = true;
-});
+  socket.on('media done', function() {
+    console.log('******* Got Media done ********');
+    console.log('isStarted is ', isStarted);
+    console.log('isInitiator is', isInitiator);
+  });
 
-socket.on('joined', function (message){
-  console.log('This peer has joined room ' + message['room']);
-  isChannelReady = true;
+  socket.on('message', function (message){
+    console.log('Client received message:', message);
+    if (message === 'media done') {
+      maybeStart();
+    } else 
+    if (message.type === 'offer') {
+      if (!isInitiator && !isStarted) {
+        maybeStart();
+      }
+      pc.setRemoteDescription(new RTCSessionDescription(message));
+      doAnswer();
+    } else if (message.type === 'answer' && isStarted) {
+      pc.setRemoteDescription(new RTCSessionDescription(message));
+    } else if (message.type === 'candidate' && isStarted) {
+      var candidate = new RTCIceCandidate({
+        sdpMLineIndex: message.label,
+        candidate: message.candidate
+      });
+      pc.addIceCandidate(candidate);
+    } else if (message === 'bye' && isStarted) {
+      handleRemoteHangup();
+    }
+  });
+
+  socketButton.disabled = true
+
 });
 
 
@@ -77,65 +110,80 @@ socket.on('joined', function (message){
 ////////////////////////////////////////////////
 
 function sendMessage(message){
-	console.log('Client sending message: ', message);
+  console.log('Client sending message: ', message);
   // if (typeof message === 'object') {
   //   message = JSON.stringify(message);
   // }
-  socket.emit('message', message);
+  if (socket !== null)
+  {
+    socket.emit('message', message);
+  }
 }
 
-socket.on('message', function (message){
-  console.log('Client received message:', message);
-  if (message === 'got user media') {
-  	maybeStart();
-  } else if (message.type === 'offer') {
-    if (!isInitiator && !isStarted) {
-      maybeStart();
-    }
-    pc.setRemoteDescription(new RTCSessionDescription(message));
-    doAnswer();
-  } else if (message.type === 'answer' && isStarted) {
-    pc.setRemoteDescription(new RTCSessionDescription(message));
-  } else if (message.type === 'candidate' && isStarted) {
-    var candidate = new RTCIceCandidate({
-      sdpMLineIndex: message.label,
-      candidate: message.candidate
-    });
-    pc.addIceCandidate(candidate);
-  } else if (message === 'bye' && isStarted) {
-    handleRemoteHangup();
-  }
-});
+
 
 ////////////////////////////////////////////////////
+var constraints = {video: true};
 
 var localVideo = document.querySelector('#localVideo');
 var remoteVideo = document.querySelector('#remoteVideo');
+
+var startButton = document.getElementById("startButton");
+var callButton = document.getElementById("callButton");
+var sendButton = document.getElementById("sendButton");
+var closeButton = document.getElementById("closeButton");
+startButton.disabled = false;
+callButton.disabled = false;
+sendButton.disabled = true;
+closeButton.disabled = true;
+startButton.onclick = startLocalVideo;
+
+
 
 function handleUserMedia(stream) {
   console.log('Adding local stream.');
   localVideo.src = window.URL.createObjectURL(stream);
   localStream = stream;
-  sendMessage('got user media');
-  if (isInitiator) {
-    maybeStart();
+  //sendMessage('got user media');
+  if(isInitiator) {
+    socket.emit('get media'); 
+  } else {
+    sendMessage('media done');
   }
+     
+  //if (isInitiator) {
+  // maybeStart();
+  //}
 }
 
 function handleUserMediaError(error){
   console.log('getUserMedia error: ', error);
 }
 
-var constraints = {video: true};
-getUserMedia(constraints, handleUserMedia, handleUserMediaError);
+function startLocalVideo() {
+  getUserMedia(constraints, handleUserMedia, handleUserMediaError);
+  console.log('Getting user media with constraints', constraints);
+  startButton.disabled = true;
+}
 
-console.log('Getting user media with constraints', constraints);
 
-//if (location.hostname != "localhost") {
-//  requestTurn('https://computeengineondemand.appspot.com/turn?username=41784574&key=4080218913');
-//}
+// callButton.onclick = call;
+
+// function call() {
+//   callButton.disabled = true;
+//   trace("Starting call");
+
+//   createPeerConnection();
+//   console.log("Peer connection Clicked")
+
+// };
+
+
 
 function maybeStart() {
+  // if (typeof localStream == 'undefined') {
+  //   startLocalVideo();
+  // }
   if (!isStarted && typeof localStream != 'undefined' && isChannelReady) {
     createPeerConnection();
     pc.addStream(localStream);
@@ -148,7 +196,7 @@ function maybeStart() {
 }
 
 window.onbeforeunload = function(e){
-	sendMessage('bye');
+  sendMessage('bye');
 }
 
 /////////////////////////////////////////////////////////
@@ -224,7 +272,7 @@ function requestTurn(turn_url) {
     xhr.onreadystatechange = function(){
       if (xhr.readyState === 4 && xhr.status === 200) {
         var turnServer = JSON.parse(xhr.responseText);
-      	console.log('Got TURN server: ', turnServer);
+        console.log('Got TURN server: ', turnServer);
         pc_config.iceServers.push({
           'url': 'turn:' + turnServer.username + '@' + turnServer.turn,
           'credential': turnServer.password

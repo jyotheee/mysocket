@@ -15,18 +15,27 @@ def index():
 @socketio.on('connect', namespace='/test')
 def test_connect():
 	print("*************************************")
-	emit('my response', {'data': 'Connected', 'count': 0})
+	emit('log', {'data': 'Connected', 'count': 0})
+	emit('my response')
 
 
 @socketio.on('disconnect', namespace='/test')
 def test_disconnect():
     print('Client disconnected')
 
+@socketio.on('get media', namespace='/test')
+def get_media_from_all_clients():
+	clients = socketio.rooms.get('/test', {}).get('foo', set())
+	for socket in clients:
+		if socket != request.namespace:
+			print "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
+			print("Sending get media to other clients")
+			socket.emit('get media')
+
 @socketio.on('message', namespace='/test')
 def handle_message(message):
 	print('Message received on server:', message)
-	emit('log', {'Got message' : message }, broadcast=True)
-	emit('message', message)
+	emit('message', message, broadcast=True)
 
 @socketio.on('create or join room', namespace='/test')
 def create_join_room(message):
@@ -42,7 +51,9 @@ def create_join_room(message):
 	numClients = len(clients);
 	print("number of clients in the room", numClients)
 
- 	# emit('log', {'Room has' : session['room_count'] }, broadcast=True)
+
+	print message
+
  	emit('log', {'Request to create or join room' : message['room']})
  	emit('log', {'numClients before adding:' : numClients})
 
