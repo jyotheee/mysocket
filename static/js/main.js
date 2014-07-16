@@ -125,19 +125,21 @@ function sendMessage(message){
 ////////////////////////////////////////////////////
 var constraints = {video: true};
 
+var dataChannel;
+var sendChannel, receiveChannel;
+
 var localVideo = document.querySelector('#localVideo');
 var remoteVideo = document.querySelector('#remoteVideo');
 
 var startButton = document.getElementById("startButton");
-var callButton = document.getElementById("callButton");
 var sendButton = document.getElementById("sendButton");
 var closeButton = document.getElementById("closeButton");
 startButton.disabled = false;
-callButton.disabled = false;
-sendButton.disabled = true;
+sendButton.disabled = false;
 closeButton.disabled = true;
 startButton.onclick = startLocalVideo;
-
+sendButton.onclick = sendData;
+//closeButton.onclick = closeDataChannels;
 
 
 function handleUserMedia(stream) {
@@ -167,23 +169,8 @@ function startLocalVideo() {
 }
 
 
-// callButton.onclick = call;
-
-// function call() {
-//   callButton.disabled = true;
-//   trace("Starting call");
-
-//   createPeerConnection();
-//   console.log("Peer connection Clicked")
-
-// };
-
-
 
 function maybeStart() {
-  // if (typeof localStream == 'undefined') {
-  //   startLocalVideo();
-  // }
   if (!isStarted && typeof localStream != 'undefined' && isChannelReady) {
     createPeerConnection();
     pc.addStream(localStream);
@@ -195,6 +182,67 @@ function maybeStart() {
   }
 }
 
+function trace(text) {
+  console.log((performance.now() / 1000).toFixed(3) + ": " + text);
+}
+
+function sendData() {
+  var data = document.getElementById("dataChannelSend").value;
+  sendChannel.send(data);
+  trace('Sent data: ' + data);
+}
+
+function handleSendChannelStateChange() {
+  var readyState = sendChannel.readyState;
+  trace('Send channel state is: ' + readyState);
+  if (readyState == "open") {
+    dataChannelSend.disabled = false;
+    dataChannelSend.focus();
+    dataChannelSend.placeholder = "";
+    sendButton.disabled = false;
+    closeButton.disabled = false;
+  } else {
+    //dataChannelSend.disabled = true;
+    sendButton.disabled = true;
+    closeButton.disabled = true;
+  }
+}
+
+
+function gotReceiveChannel(event) {
+  trace('Receive Channel Callback');
+  console.log('event channel is', event.channel)
+  receiveChannel = event.channel;
+  receiveChannel.onmessage = handleMessage;
+  receiveChannel.onopen = handleReceiveChannelStateChange;
+  receiveChannel.onclose = handleReceiveChannelStateChange;
+}
+
+function closeDataChannels() {
+  trace('Closing data channels');
+  sendChannel.close();
+  trace('Closed data channel with label: ' + sendChannel.label);
+  receiveChannel.close();
+  trace('Closed data channel with label: ' + receiveChannel.label);
+  //localPeerConnection.close();
+  //remotePeerConnection.close();
+  //localPeerConnection = null;
+  //remotePeerConnection = null;
+  //trace('Closed peer connections');
+  startButton.disabled = false;
+  sendButton.disabled = true;
+  closeButton.disabled = true;
+  dataChannelSend.value = "";
+  dataChannelReceive.value = "";
+  dataChannelSend.disabled = true;
+  dataChannelSend.placeholder = "Press Start, enter some text, then press Send.";
+}
+
+function handleMessage(event) {
+  trace('Received message: ' + event.data);
+  document.getElementById("dataChannelReceive").value = event.data;
+}
+
 window.onbeforeunload = function(e){
   sendMessage('bye');
 }
@@ -203,11 +251,19 @@ window.onbeforeunload = function(e){
 
 function createPeerConnection() {
   try {
-    pc = new RTCPeerConnection(null);
+    pc = new RTCPeerConnection(null, {optional: [{RtpDataChannels: true}]});
     pc.onicecandidate = handleIceCandidate;
     pc.onaddstream = handleRemoteStreamAdded;
     pc.onremovestream = handleRemoteStreamRemoved;
     console.log('Created RTCPeerConnnection');
+
+    sendChannel = pc.createDataChannel("Chat", {reliable: false});
+    trace('Created send data channel');
+    pc.ondatachannel = gotReceiveChannel;      
+    sendChannel.onmessage = handleMessage;
+    sendChannel.onopen = handleSendChannelStateChange;
+    sendChannel.onclose = handleSendChannelStateChange;
+ 
   } catch (e) {
     console.log('Failed to create PeerConnection, exception: ' + e.message);
     alert('Cannot create RTCPeerConnection object.');

@@ -10,8 +10,17 @@
 
 <title>WebRTC client</title>
 
-<!-- <link rel='stylesheet' href='css/main.css' /> -->
+<style>
+#localVideo {
+  width: 40%;
+  display: inline-block;
+}
 
+#remoteVideo {
+  width: 40%;
+  display: inline-block;
+}
+</style>
 </head>
 
 <body>
@@ -27,12 +36,11 @@
     <video id='remoteVideo' autoplay></video>
   </div>
 
-	<textarea id="dataChannelSend" disabled placeholder="Press Start, enter some text, then press Send."></textarea>
+	<textarea id="dataChannelSend" placeholder="enter some text, then press Send."></textarea>
 	<textarea id="dataChannelReceive" disabled></textarea>
 
   <div id="buttons">
     <button id="startButton">Start</button>
-    <button id="callButton">Call</button>
     <button id="sendButton">Send</button>
     <button id="closeButton">Stop</button>
   </div>
