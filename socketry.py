@@ -76,18 +76,5 @@ def create_join_room(message):
 	numClients = len(clients)
 	emit('log', {'numClients after adding:' : numClients}) 			
 
-	# if numClients == 0:
-	# 	socketio.join(room)
-	# 	socketio.emit('created', room)
-	# elif numClients == 1:
-	# 	socketsio.io.i  (room).emit('join', room)
-	# 	socketio.join(room);
-	# 	socketio.emit('joined', room);
-	# else:
-	# 	socketio.emit('full', room);
-
-	# socketio.emit('emit(): client ' + socketio.id + ' joined room ' + room);
-	# socketio.broadcast.emit('broadcast(): client ' + socketio.id + ' joined room ' + room);
-
 if __name__ == "__main__":
     socketio.run(app, host='0.0.0.0')
