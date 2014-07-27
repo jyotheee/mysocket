@@ -75,17 +75,17 @@ def move_made(message):
  	#check for winning condition. If gameboard full, it is a draw, else check for win condition
  	if isFull(newboard):
  		emit('game over', {'result' : 'Game is a draw'}, broadcast=True)
- 		winner = 'Draw'
+ 		#winner = 'Draw'
  	elif isWinner(newboard, message['position_value']):
  		print 'Winner of the game'
  		emit('game over', {'result' : 'you win the game'})
  		# dbuser1 = dbsession.query(User).filter_by(socketid=request.namespace.socket.sessid).first()
- 		winner = dbuser1.username
+ 		# winner = dbuser1.username
  		for socket in clients:
  			if socket != request.namespace:
  				socket.emit('game over', {'result' : 'you lose the game'})
  				# dbuser2 = dbsession.query(User).filter_by(socketid=socket.socket.sessid).first()
- 		game = Game(usr1=dbuser1.username, usr2=dbuser2.username, winner=winner)
+ 		#game = Game(usr1=dbuser1.username, usr2=dbuser2.username, winner=winner)
 
 
  	print "new board is %r", newboard
