@@ -23,7 +23,7 @@ var sdpConstraints = {'mandatory': {
 var room = location.pathname.substring(1);
 if (room === '' || room === null) {
 //  room = prompt('Enter room name:');
-  room = 'foo';
+  room = 'game';
 } 
 
 var namespace = '/test';
@@ -70,6 +70,7 @@ $("#socketButton").click(function(clickEvt) {
       startLocalVideo();
     }
   });
+
 
   socket.on('media done', function() {
     console.log('******* Got Media done ********');
