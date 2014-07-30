@@ -28,8 +28,12 @@ if (room === '' || room === null) {
 
 var namespace = '/test';
 var socket = null;
-$("#socketButton").click(function(clickEvt) {
+
+function create_socket(two_players, player_name) {
   console.log("Clicked start");
+  console.log("two_players is ", two_players);
+  console.log("player_name is " + player_name);
+
   socket = io.connect('http://' + document.domain + ':' + location.port + namespace);
 
   socket.on('log', function (data){
@@ -39,7 +43,7 @@ $("#socketButton").click(function(clickEvt) {
   socket.on('my response', function () {
     if (room !== '') {
       console.log('Create or join room', room);
-      socket.emit('create or join room', {'room': room } );
+      socket.emit('create or join room', {'room': room, 'username' : player_name, 'two_players' : two_players} );
     }
   });
 
@@ -50,6 +54,7 @@ $("#socketButton").click(function(clickEvt) {
 
   socket.on('full', function (room){
     console.log('Room ' + room + ' is full');
+    $('#roomFullModal').modal('show');
   });
 
   socket.on('join', function (message){
@@ -70,7 +75,6 @@ $("#socketButton").click(function(clickEvt) {
       startLocalVideo();
     }
   });
-
 
   socket.on('media done', function() {
     console.log('******* Got Media done ********');
@@ -101,12 +105,6 @@ $("#socketButton").click(function(clickEvt) {
       handleRemoteHangup();
     }
   });
-
-  socketButton.disabled = true
-
-});
-
-
 
 ////////////////////////////////////////////////
 
@@ -449,3 +447,4 @@ function removeCN(sdpLines, mLineIndex) {
   return sdpLines;
 }
 
+}

@@ -6,6 +6,7 @@ from sqlalchemy.dialects.sqlite import DATETIME
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.orm import sessionmaker, scoped_session
+import random
 
 global game_board
 
@@ -55,10 +56,30 @@ def updateGameBoard(letter, pos):
     return game_board
 
 def isSpaceFree(board, move):
-    return board[move] == ' '
+    return board[move] == ''
 
 def makeMove(board, letter, move):
     board[move] = letter
+
+def chooseRandomMoveFromList(board, movesList):
+    # Returns a valid move from the passed list on the passed board.
+    # Returns None if there is no valid move.
+    possibleMoves = []
+    for i in movesList:
+        if isSpaceFree(board, i):
+            possibleMoves.append(i)
+    if len(possibleMoves) != 0:
+        return random.choice(possibleMoves)
+    else:
+        return None
+
+def getBoardCopy(board):
+    # Make a duplicate of the board list and return it the duplicate.
+    dupeBoard = []
+    for i in board:
+        dupeBoard.append(i)
+    return dupeBoard
+
 
 def isWinner(b, l):
     return ((b[1] == l and b[2] == l and b[3] == l) or
@@ -78,23 +99,39 @@ def isFull(b):
 def compMove(board):
     completter = "O"
 
-    checkb = board;
+    checkb = getBoardCopy(board);
 
     # check if comp can win the next turn
     for i in range(1, 10):
         if isSpaceFree(checkb, i):
             makeMove(checkb, "O", i)
-            if isWinner(checkb, i):
+            if isWinner(checkb, "O"):
                 return i
+
+    checkb = getBoardCopy(board);
+
     # check if player can win and then block him
     for i in range(1, 10):
+        print "checking players move"
         if isSpaceFree(checkb, i):
+            print "inside the isSpaceFree"
             makeMove(checkb, "X", i)
-            if isWinner(checkb, i):
+            if isWinner(checkb, "X"):
+                print "found winner"
                 return i
 
-    # choose from corners 1, 3, 7, 9 
+    # choose from corners 1, 3, 7, 9
+    move = chooseRandomMoveFromList(board, [1, 3, 7, 9])
+    print "Random corner move is %d", move
+    if move != None:
+        return move
 
+    # Try to take the center, if it is free.
+    if isSpaceFree(board, 5):
+        return 5
+
+    # Move on one of the sides.
+    return chooseRandomMoveFromList(board, [2, 4, 6, 8])
 
 def main():
     """In case we need this for something"""
