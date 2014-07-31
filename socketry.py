@@ -1,7 +1,7 @@
 from flask import Flask, request, session, render_template, g, redirect, url_for, flash
 import jinja2
 from flask.ext.socketio import SocketIO, emit, join_room, leave_room
-from game_model import Game, Move, User, dbsession, createBoard, updateGameBoard, isWinner, isFull, compMove
+from game_model import Game, Move, User, dbsession, createBoard, updateGameBoard, isWinner, isFull, compMove, create_results_dict
 
 app = Flask(__name__)
 app.secret_key = 'secret key'
@@ -147,17 +147,15 @@ def create_db_reports(message):
 		usr1 = session['user']
 		usr2 = "Computer"		
 		results = dbsession.query(Game).filter_by(usr1=usr1).filter_by(usr2=usr2).all()
-		print results
-		# for eachgame in results:
-		# 	if eachgame.winner == usr1:
-				
 	else:
 		dbuser1 = dbsession.query(User).filter_by(socketid=request.namespace.socket.sessid).first()
 		for socket in clients:
 				if socket != request.namespace:
 					dbuser2 = dbsession.query(User).filter_by(socketid=socket.socket.sessid).first()
 		results = dbsession.query(Game).filter_by(usr1=dbuser1.username).filter_by(usr2=dbuser2.username).all()
-		print results
+		
+	display_results = create_results_dict(results)
+	emit('display results', display_results)
 
 
 @socketio.on('create or join room', namespace='/test')
