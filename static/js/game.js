@@ -16,6 +16,7 @@ $(document).ready(function() {
     $('#getReports').click( function() {
         socket.emit('get reports', {'two_players' : two_players});
     });
+
 });
 
 function clear_game_board() {
@@ -53,8 +54,12 @@ function game_socket_events() {
 
             $('#endGame').click( function(e) {
                 $('#endModal-body-id').html("Thanks for playing!");
-                $('#endModal-footer-id').html('');  
+                $('#endModal-footer-id').html('');
             });
+    });
+
+    socket.on('display results', function(message) {
+        console.log("Display results is", message);
     });
 }
 
