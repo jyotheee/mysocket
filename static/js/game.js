@@ -12,7 +12,17 @@ $(document).ready(function() {
         socket.emit('game move', {'position' : x, 'position_value' : move_letter, 'two_players' : two_players, 'game_id' : game_id});
         my_move = false;
     });
+
+    $('#getReports').click( function() {
+        socket.emit('get reports', {'two_players' : two_players});
+    });
 });
+
+function clear_game_board() {
+    $('.column').each( function() {
+        $(this).html('');
+    });
+}
 
 function game_socket_events() {
 
@@ -27,9 +37,23 @@ function game_socket_events() {
 
     socket.on('game over', function(message) {
             var gameover = message['result'];
+            $('#endModal-body-id').html(gameover);
+            $('#endModal-footer-id').html('<button type="button" class="btn btn-default" name="playagain" id="playAgain">Play Again?</button>' +
+                '<button type="button" class="btn btn-default" name="endgame" id="endGame">Done?</button>');
             $('#endModal').modal('show');
-            $('#endModal').on('show.bs.modal', function(e) {
-                $('#endModal-body-id').html('something');
+
+            $('#playAgain').click( function(e) {
+                console.log("clicked play again");
+                my_move = true;
+                game_id = 0;
+                move_letter = "X";
+                clear_game_board();
+                $('#endModal').modal('hide');
+            });
+
+            $('#endGame').click( function(e) {
+                $('#endModal-body-id').html("Thanks for playing!");
+                $('#endModal-footer-id').html('');  
             });
     });
 }

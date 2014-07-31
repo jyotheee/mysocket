@@ -16,7 +16,6 @@ def index():
 @socketio.on('connect', namespace='/test')
 def test_connect():
 	print("*************************************")
-	createBoard()
 	emit('log', {'data': 'Connected', 'count': 0})
 	emit('my response')
 
@@ -45,6 +44,11 @@ def move_made(message):
 
 	print('Move info received on the server')
 	clients = socketio.rooms.get('/test', {}).get('game', set())
+
+	#check if a new game has started
+	if message['game_id'] == 0:
+		createBoard()
+		play = False
 
 	#assign game id to the database
 	if not play:
@@ -133,10 +137,31 @@ def move_made(message):
 
  	print "new board is %r", newboard
 
+@socketio.on('get reports', namespace='/test')
+def create_db_reports(message):
+
+	clients = socketio.rooms.get('/test', {}).get('game', set())
+
+	#check if the user is playing with computer (or) other player
+	if message['two_players'] == False:
+		usr1 = session['user']
+		usr2 = "Computer"		
+		results = dbsession.query(Game).filter_by(usr1=usr1).filter_by(usr2=usr2).all()
+		print results
+		# for eachgame in results:
+		# 	if eachgame.winner == usr1:
+				
+	else:
+		dbuser1 = dbsession.query(User).filter_by(socketid=request.namespace.socket.sessid).first()
+		for socket in clients:
+				if socket != request.namespace:
+					dbuser2 = dbsession.query(User).filter_by(socketid=socket.socket.sessid).first()
+		results = dbsession.query(Game).filter_by(usr1=dbuser1.username).filter_by(usr2=dbuser2.username).all()
+		print results
+
+
 @socketio.on('create or join room', namespace='/test')
 def create_join_room(message):
-	global play
-	play = False
 	print ("create join room route in the server")
 	print ("username on the server is" + message['username'])
 	#print('socketio is:'), socketio.rooms.get('/test', {}).get('game', set())
