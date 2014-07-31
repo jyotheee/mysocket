@@ -133,6 +133,15 @@ def compMove(board):
     # Move on one of the sides.
     return chooseRandomMoveFromList(board, [2, 4, 6, 8])
 
+def create_results_dict(results):
+    results_dict = {}
+    for eachgame in results:
+            if eachgame.winner in results_dict:
+                results_dict[eachgame.winner] += 1
+            else:
+                results_dict[eachgame.winner] = 1
+    return results_dict
+
 def main():
     """In case we need this for something"""
     pass
