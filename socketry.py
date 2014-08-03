@@ -32,6 +32,7 @@ def get_media_from_all_clients():
 			print "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"
 			print("Sending get media to other clients")
 			socket.emit('get media')
+			emit('dashlog', 'Accessing media from other player')
 
 @socketio.on('message', namespace='/test')
 def handle_message(message):
@@ -49,6 +50,7 @@ def move_made(message):
 	if message['game_id'] == 0:
 		createBoard()
 		play = False
+		emit('dashlog', 'Game started', broadcast=True)
 
 	#assign game id to the database
 	if not play:
@@ -155,18 +157,14 @@ def create_db_reports(message):
 		results = dbsession.query(Game).filter_by(usr1=dbuser1.username).filter_by(usr2=dbuser2.username).all()
 		
 	display_results = create_results_dict(results)
-	emit('display results', display_results)
+	emit('display results', display_results, broadcast=True)
 
 
 @socketio.on('create or join room', namespace='/test')
 def create_join_room(message):
 	print ("create join room route in the server")
 	print ("username on the server is" + message['username'])
-	#print('socketio is:'), socketio.rooms.get('/test', {}).get('game', set())
 
-	# namespaces = socketio.rooms
-	# namespace = namespaces.get('/test', {})
-	# room = namespace.get('foo', set())
 	clients = socketio.rooms.get('/test', {}).get('game', set())
 
 	numClients = len(clients);
@@ -204,8 +202,15 @@ def create_join_room(message):
     
 	clients = socketio.rooms.get('/test', {}).get('game', set())
 	numClients = len(clients)
-	emit('log', {'numClients after adding:' : numClients}) 	
-
+	emit('log', {'numClients after adding:' : numClients}) 
+	
+	if message['two_players'] == False:
+		emit('dashlog', 'You joined the room. Make your move')
+	else:
+		if numClients == 1:
+			emit('dashlog', 'You joined the game room. Waiting for another player to join')
+		else:
+			emit('dashlog', 'Two players in the room. Start playing', broadcast=True)
 
 if __name__ == "__main__":
     socketio.run(app, host='0.0.0.0')
