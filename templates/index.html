@@ -6,18 +6,17 @@
 <meta name='description' content='WebRTC Reference App' />
 <meta name='viewport' content='width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1'>
 <base target='_blank'>
-
+<script src="/static/js/Chart.min.js"></script>
 <script type="text/javascript" src='//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js'></script>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script type="text/javascript" src='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js'></script>
+<script src="/static/js/Chart.min.js"></script>
 
-<title>Realtime tictactoe</title>
+<title>PlayWithRTC</title>
 <link rel="stylesheet" href="/static/css/style.css" />
 </head>
 
 <body>
-  
-  <div id='container'>
     
     <div class="modal" id="nameEntryModal" role="dialog" data-keyboard="false" data-backdrop="static">
       <div class="modal-dialog">
@@ -48,8 +47,32 @@
       </div>
     </div>
 
-    <div id="game">
-      <div id="gameboard">
+    <div class="modal fade" id="resultModal" role="dialog" data-keyboard="false" data-backdrop="static">
+      <div class="modal-dialog">
+        <div class="modal-content">          
+          <div class="modal-body" id="resultModal-body-id" width="300" height="300">
+            <script src="/static/js/Chart.min.js"></script>
+            <div id="canvas-holder">
+              <canvas id="chart-area"/>
+            </div>
+          </div>          
+        </div>
+      </div>
+    </div> 
+
+
+  <div id='container'>
+    
+    <nav class="navbar navbar-default" role="navigation" class="col-xs-12">
+      <div id="dashboard">
+        <div id="dashuser" class="col-xs-4">dashusername</div>
+        <div id="dashroom" class="col-xs-4">dashroomname</div>
+        <div id="dashmessage" class="col-xs-4">dashmessage</div>
+      </div>
+    </nav>
+
+  <div id="maingame" class="col-xs-12">
+    <div id="game" class="col-xs-6">
         <div class="row" id="row1" rowvalue="1">
           <div class="column spot1" data-value="7"></div>
           <div class="column spot2" data-value="8"></div>
@@ -65,31 +88,25 @@
           <div class="column spot2" data-value="2"></div>
           <div class="column spot3" data-value="3"></div>
         </div>
-      </div>
     </div>
 
-    <div id="RTC">
-
+    <div id="RTC" class="col-xs-6">     
       <div id='videos'>
         <video id='localVideo' autoplay muted></video>
         <video id='remoteVideo' autoplay></video>
       </div>
-
     	<textarea id="dataChannelSend" placeholder="enter some text, then press Send."></textarea>
     	<textarea id="dataChannelReceive" disabled></textarea>
-
       <div id="buttons">
-        <button id="startButton">Start</button>
-        <button id="sendButton">Send</button>
-        <button id="closeButton">Stop</button>
+        <button id="startButton" class="btn btn-default">Start</button>
+        <button id="sendButton" class="btn btn-default">Send</button>
+        <button id="closeButton" class="btn btn-default">Stop</button>
       </div>
     </div>
-  </div>
+</div>
 
-  <div id='reports'>
-    <button type='button' id="getReports">Reports</button>
-  </div>
-  
+</div>
+
   <script src='/static/js/main.js'></script>
   <script>
    var player_name; //global js variable
@@ -104,6 +121,8 @@
         player_name = $('#username').val();
         console.log('username is', player_name);
         askforplayers(player_name);
+        $('dashuser').html(player_name);
+        $('dashroom').html(room);
       }
     });
 
@@ -134,6 +153,5 @@
   <script src='/static/js/lib/adapter.js'></script>
   <script src='/static/js/game.js'></script>
 
-  
 </body>
 </html>

@@ -13,10 +13,6 @@ $(document).ready(function() {
         my_move = false;
     });
 
-    $('#getReports').click( function() {
-        socket.emit('get reports', {'two_players' : two_players});
-    });
-
 });
 
 function clear_game_board() {
@@ -42,6 +38,7 @@ function game_socket_events() {
             $('#endModal-footer-id').html('<button type="button" class="btn btn-default" name="playagain" id="playAgain">Play Again?</button>' +
                 '<button type="button" class="btn btn-default" name="endgame" id="endGame">Done?</button>');
             $('#endModal').modal('show');
+            socket.emit('get reports', {'two_players' : two_players});
 
             $('#playAgain').click( function(e) {
                 console.log("clicked play again");
@@ -53,15 +50,59 @@ function game_socket_events() {
             });
 
             $('#endGame').click( function(e) {
-                $('#endModal-body-id').html("Thanks for playing!");
-                $('#endModal-footer-id').html('');
+                $('#endModal').modal('hide');
             });
     });
 
     socket.on('display results', function(message) {
         console.log("Display results is", message);
+        $('#endGame').click( function(e) {
+            $('#resultModal').css('width', '750px');
+            $('#resultModal').css('height', '500px');
+            $('#resultModal').modal('show');
+            $('#resultModal-body-id').html(chart_results(message));
+        });
+        
     });
+
+    socket.on('dashlog', function(message) {
+        $('#dashmessage').html(message);
+    });
+
 }
+
+function chart_results(message) {
+
+var ctx = document.getElementById("chart-area").getContext("2d");
+
+  var data = [
+    {
+        value: message['Computer'],
+        color:"#F7464A",
+        highlight: "#FF5A5E",
+        label: "Red"
+    },
+    {
+        value: message['Draw'],
+        color: "#46BFBD",
+        highlight: "#5AD3D1",
+        label: "Green"
+    },
+    {
+        value: message['jyothi'],
+        color: "#FDB45C",
+        highlight: "#FFC870",
+        label: "Yellow"
+    }
+  ];
+
+new Chart(ctx).PolarArea(data, {responsive : true});
+
+}
+
+
+
+
 
 // TODO:
 // disable the clicking of the gameboard after game over
