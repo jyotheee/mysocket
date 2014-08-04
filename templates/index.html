@@ -6,7 +6,6 @@
 <meta name='description' content='WebRTC Reference App' />
 <meta name='viewport' content='width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1'>
 <base target='_blank'>
-<script src="/static/js/Chart.min.js"></script>
 <script type="text/javascript" src='//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js'></script>
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script type="text/javascript" src='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js'></script>
@@ -49,13 +48,19 @@
 
     <div class="modal fade" id="resultModal" role="dialog" data-keyboard="false" data-backdrop="static">
       <div class="modal-dialog">
-        <div class="modal-content">          
-          <div class="modal-body" id="resultModal-body-id" width="300" height="300">
-            <script src="/static/js/Chart.min.js"></script>
+        <div class="modal-content"> 
+          
+          <div class="modal-header" id="resultModal-header-id">
+            <h4 class="modal-title">Thanks for playing!</h4>
+            <h5>Results:</h5>
+          </div>         
+          
+          <div class="modal-body" id="resultModal-body-id">
             <div id="canvas-holder">
-              <canvas id="chart-area"/>
+              <canvas id="chart-area" width="300" height="300" style="margin: 0 auto; display: block;"></canvas>
             </div>
-          </div>          
+          </div>
+
         </div>
       </div>
     </div> 
@@ -71,39 +76,57 @@
       </div>
     </nav>
 
-  <div id="maingame" class="col-xs-12">
-    <div id="game" class="col-xs-6">
-        <div class="row" id="row1" rowvalue="1">
-          <div class="column spot1" data-value="7"></div>
-          <div class="column spot2" data-value="8"></div>
-          <div class="column spot3" data-value="9"></div>
-        </div>
-        <div class="row" id="row2" rowvalue="2">
-          <div class="column spot1" data-value="4"></div>
-          <div class="column spot2" data-value="5"></div>
-          <div class="column spot3" data-value="6"></div>
-        </div>
-        <div class="row" id="row3" rowvalue="3">
-          <div class="column spot1" data-value="1"></div>
-          <div class="column spot2" data-value="2"></div>
-          <div class="column spot3" data-value="3"></div>
-        </div>
-    </div>
+  <div class="container-fluid">
+    <div id="maingame" class="row" style="margin-top: 100px">
 
-    <div id="RTC" class="col-xs-6">     
-      <div id='videos'>
-        <video id='localVideo' autoplay muted></video>
-        <video id='remoteVideo' autoplay></video>
+      <div class="col-xs-6">
+        <div style="position: relative; width: 300px; height: 300px; margin: 0 auto">
+          <div id="game" style='width: 100%; height: 100%; position: absolute; left: 0'>
+              <div class="tt-row" id="row1" rowvalue="1">
+                <div class="tt-column spot1" data-value="7"></div>
+                <div class="tt-column spot2" data-value="8"></div>
+                <div class="tt-column spot3" data-value="9"></div>
+              </div>
+              <div class="tt-row" id="row2" rowvalue="2">
+                <div class="tt-column spot1" data-value="4"></div>
+                <div class="tt-column spot2" data-value="5"></div>
+                <div class="tt-column spot3" data-value="6"></div>
+              </div>
+              <div class="tt-row" id="row3" rowvalue="3">
+                <div class="tt-column spot1" data-value="1"></div>
+                <div class="tt-column spot2" data-value="2"></div>
+                <div class="tt-column spot3" data-value="3"></div>
+              </div>
+          </div>
+
+          <canvas id="game-canvas" style='width: 100%; height: 100%; position: absolute; left: 0'></canvas>
+        </div>
       </div>
-    	<textarea id="dataChannelSend" placeholder="enter some text, then press Send."></textarea>
-    	<textarea id="dataChannelReceive" disabled></textarea>
-      <div id="buttons">
-        <button id="startButton" class="btn btn-default">Start</button>
-        <button id="sendButton" class="btn btn-default">Send</button>
-        <button id="closeButton" class="btn btn-default">Stop</button>
+
+      <div id="RTC" class="col-xs-6" style="height: 350px">
+        <div class="row">
+          <div id='videos' class="col-xs-12">
+            <div style="position: relative; margin: 0 auto; width: 400px; height: 300px;">
+              <video id='localVideo' style="width: 400px; height: 300px; position: absolute; right: 0; bottom: 0" autoplay muted></video>
+              <video id='remoteVideo' style="width: 133px; height: 100px;  position: absolute; right: 0; bottom: 0" autoplay></video>
+            </div>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top: 30px;">
+          <div class="col-xs-12">
+          	<textarea id="dataChannelSend" placeholder="enter some text, then press Send."></textarea>
+          	<textarea id="dataChannelReceive" disabled></textarea>
+            <div id="buttons">
+              <button id="startButton" class="btn btn-default">Start</button>
+              <button id="sendButton" class="btn btn-default">Send</button>
+              <button id="closeButton" class="btn btn-default">Stop</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-</div>
+  </div>
 
 </div>
 

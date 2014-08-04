@@ -3,7 +3,7 @@ var my_move = true;
 var game_id = 0; //first game id is 0 and the server assigns a new game id
 
 $(document).ready(function() {
-    $(".column").click( function() {
+    $(".tt-column").click( function() {
         if(!my_move) return
         var x = parseInt($( this ).attr("data-value"));
         console.log("User position is...", x);
@@ -12,6 +12,13 @@ $(document).ready(function() {
         socket.emit('game move', {'position' : x, 'position_value' : move_letter, 'two_players' : two_players, 'game_id' : game_id});
         my_move = false;
     });
+
+      var context = $('#game-canvas')[0].getContext('2d');
+
+      context.beginPath();
+      context.moveTo(0, 0);
+      context.lineTo(600, 300);
+      context.stroke();
 
 });
 
@@ -57,12 +64,12 @@ function game_socket_events() {
     socket.on('display results', function(message) {
         console.log("Display results is", message);
         $('#endGame').click( function(e) {
-            $('#resultModal').css('width', '750px');
-            $('#resultModal').css('height', '500px');
+            $('#resultModal').on('show.bs.modal', function (e) {
+                chart_results(message);
+            });
+
             $('#resultModal').modal('show');
-            $('#resultModal-body-id').html(chart_results(message));
         });
-        
     });
 
     socket.on('dashlog', function(message) {
@@ -71,38 +78,48 @@ function game_socket_events() {
 
 }
 
+/*
+document.getElementById('my-id') -> 1 elem
+document.getElementsByTagName('canvas') -> multiple
+document.getElementsByClassName('my-class') -> multiple
+
+$('#my-id')     -> multiple
+$('canvas')     -> multiple
+$('.my-class')  -> multiple
+*/
+
+
+
 function chart_results(message) {
+    labels = [];
 
-var ctx = document.getElementById("chart-area").getContext("2d");
-
-  var data = [
-    {
-        value: message['Computer'],
-        color:"#F7464A",
-        highlight: "#FF5A5E",
-        label: "Red"
-    },
-    {
-        value: message['Draw'],
-        color: "#46BFBD",
-        highlight: "#5AD3D1",
-        label: "Green"
-    },
-    {
-        value: message['jyothi'],
-        color: "#FDB45C",
-        highlight: "#FFC870",
-        label: "Yellow"
+    for (var key in message) {
+        labels.push(key);
     }
-  ];
+     
+    var ctx = $("#chart-area")[0].getContext("2d");
 
-new Chart(ctx).PolarArea(data, {responsive : true});
+    var data = [
+        {
+            value: message[labels[0]],
+            color:"#F7464A",
+            highlight: "#FF5A5E",
+            label: labels[0]
+        },
+        {
+            value: message[labels[1]],
+            color: "#46BFBD",
+            highlight: "#5AD3D1",
+            label: labels[1]
+        },
+        {
+            value: message[labels[2]],
+            color: "#FDB45C",
+            highlight: "#FFC870",
+            label: labels[2]
+        }
+    ];
 
+    new Chart(ctx).PolarArea(data);
 }
 
-
-
-
-
-// TODO:
-// disable the clicking of the gameboard after game over

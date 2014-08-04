@@ -149,14 +149,31 @@ def create_db_reports(message):
 		usr1 = session['user']
 		usr2 = "Computer"		
 		results = dbsession.query(Game).filter_by(usr1=usr1).filter_by(usr2=usr2).all()
+		display_results = create_results_dict(results)
+		print display_results
+		#if only one game is played, the results are zero for a draw case and for other user
+		if not usr1 in display_results:
+			display_results[usr1] = 0;
+		if not usr2 in display_results:
+			display_results[usr2] = 0;
+		if not 'Draw' in display_results:
+			display_results['Draw'] = 0;
 	else:
 		dbuser1 = dbsession.query(User).filter_by(socketid=request.namespace.socket.sessid).first()
 		for socket in clients:
 				if socket != request.namespace:
 					dbuser2 = dbsession.query(User).filter_by(socketid=socket.socket.sessid).first()
 		results = dbsession.query(Game).filter_by(usr1=dbuser1.username).filter_by(usr2=dbuser2.username).all()
-		
-	display_results = create_results_dict(results)
+		display_results = create_results_dict(results)
+		print display_results
+		#if only one game is played, the results are zero for a draw case and for other user
+		if not dbuser1.username in display_results:
+			display_results[dbuser1.username] = 0;
+		if not dbuser2.username in display_results:
+			display_results[dbuser2.username] = 0;
+		if not 'Draw' in display_results:
+			display_results['Draw'] = 0;
+	
 	emit('display results', display_results, broadcast=True)
 
 
