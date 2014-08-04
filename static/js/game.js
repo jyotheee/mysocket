@@ -13,17 +13,17 @@ $(document).ready(function() {
         my_move = false;
     });
 
-      var context = $('#game-canvas')[0].getContext('2d');
+      // var context = $('#game-canvas')[0].getContext('2d');
 
-      context.beginPath();
-      context.moveTo(0, 0);
-      context.lineTo(600, 300);
-      context.stroke();
+      // context.beginPath();
+      // context.moveTo(0, 0);
+      // context.lineTo(600, 300);
+      // context.stroke();
 
 });
 
 function clear_game_board() {
-    $('.column').each( function() {
+    $('.tt-column').each( function() {
         $(this).html('');
     });
 }

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+<link href='http://fonts.googleapis.com/css?family=Arvo' rel='stylesheet' type='text/css'>
 <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" />
 <meta name='keywords' content='WebRTC, HTML5, JavaScript' />
 <meta name='description' content='WebRTC Reference App' />
@@ -70,8 +71,8 @@
     
     <nav class="navbar navbar-default" role="navigation" class="col-xs-12">
       <div id="dashboard">
-        <div id="dashuser" class="col-xs-4">dashusername</div>
-        <div id="dashroom" class="col-xs-4">dashroomname</div>
+        <div id="dashuser" class="col-xs-4"></div>
+        <div id="dashroom" class="col-xs-4"></div>
         <div id="dashmessage" class="col-xs-4">dashmessage</div>
       </div>
     </nav>
@@ -99,7 +100,7 @@
               </div>
           </div>
 
-          <canvas id="game-canvas" style='width: 100%; height: 100%; position: absolute; left: 0'></canvas>
+          <canvas id="game-canvas" style='display: none; width: 100%; height: 100%; position: absolute; left: 0'></canvas>
         </div>
       </div>
 
@@ -107,7 +108,7 @@
         <div class="row">
           <div id='videos' class="col-xs-12">
             <div style="position: relative; margin: 0 auto; width: 400px; height: 300px;">
-              <video id='localVideo' style="width: 400px; height: 300px; position: absolute; right: 0; bottom: 0" autoplay muted></video>
+              <video id='localVideo' poster="/static/images/video.jpg" style="width: 400px; height: 300px; position: absolute; right: 0; bottom: 0" autoplay muted></video>
               <video id='remoteVideo' style="width: 133px; height: 100px;  position: absolute; right: 0; bottom: 0" autoplay></video>
             </div>
           </div>
@@ -144,8 +145,8 @@
         player_name = $('#username').val();
         console.log('username is', player_name);
         askforplayers(player_name);
-        $('dashuser').html(player_name);
-        $('dashroom').html(room);
+        $('#dashuser').html(player_name);
+        $('#dashroom').html(room);
       }
     });
 

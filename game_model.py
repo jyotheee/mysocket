@@ -10,7 +10,7 @@ import random
 
 global game_board
 
-engine = create_engine("sqlite:///gameinfo.db", echo=False)
+engine = create_engine("sqlite:///gameinfo.db", echo=False, connect_args={'timeout': 5})
 dbsession = scoped_session(sessionmaker(bind=engine, autocommit=False, autoflush=False))
 
 Base = declarative_base()
