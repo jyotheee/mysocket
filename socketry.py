@@ -1,13 +1,15 @@
 from flask import Flask, request, session, render_template, g, redirect, url_for, flash
 import jinja2
 from flask.ext.socketio import SocketIO, emit, join_room, leave_room
-from game_model import Game, Move, User, dbsession, createBoard, updateGameBoard, isWinner, isFull, compMove, create_results_dict
+from game_model import Game, Move, User, dbsession, createBoard, updateGameBoard, isWinner, isFull, compMove, create_results_dict, getWinningloc
+
 
 app = Flask(__name__)
 app.secret_key = 'secret key'
 socketio = SocketIO(app)
 
 global play
+global client_count
 
 @app.route("/")
 def index():
@@ -42,6 +44,7 @@ def handle_message(message):
 @socketio.on('game move', namespace='/test')
 def move_made(message):
 	global play
+	global client_count
 
 	print('Move info received on the server')
 	clients = socketio.rooms.get('/test', {}).get('game', set())
@@ -51,6 +54,8 @@ def move_made(message):
 		createBoard()
 		play = False
 		emit('dashlog', 'Game started', broadcast=True)
+		winloc = []
+		client_count = 0
 
 	#assign game id to the database
 	if not play:
@@ -82,7 +87,7 @@ def move_made(message):
  	
  	#check if the incoming move is a winning move (or) last move ==> game board full
  	if isFull(newboard):
- 		emit('game over', {'result' : 'Game is a draw'}, broadcast=True)
+ 		emit('game over', {'result' : 'Game is a draw', 'winloc' : [0,0,0]}, broadcast=True)
 		dbuser1 = dbsession.query(User).filter_by(socketid=request.namespace.socket.sessid).first()
 		if message['two_players'] == False:
 			usr2 = 'Computer'
@@ -97,9 +102,10 @@ def move_made(message):
 		dbsession.commit()
 
 	elif isWinner(newboard, message['position_value']):
+		winloc = getWinningloc(newboard, message['position_value'])
 	 	dbuser1 = dbsession.query(User).filter_by(socketid=request.namespace.socket.sessid).first()
 	 	winner = dbuser1.username
-	 	emit('game over', {'result' : 'you win the game'})
+	 	emit('game over', {'result' : 'you win the game', 'winloc' : winloc})
 	 	if message['two_players'] == False:
 			usr2 = 'Computer'
 			game = dbsession.query(Game).filter_by(id=game_id)
@@ -110,7 +116,7 @@ def move_made(message):
 					dbuser2 = dbsession.query(User).filter_by(socketid=socket.socket.sessid).first()
 					game = dbsession.query(Game).filter_by(id=game_id)
 					game.update({"usr1" : dbuser1.username, "usr2" : dbuser2.username, "winner" : winner})
-					socket.emit('game over', {'result' : 'you lose the game'})
+					socket.emit('game over', {'result' : 'you lose the game', 'winloc' : winloc})
 		dbsession.commit()
 
 	else: 	#single player game with comp
@@ -125,14 +131,15 @@ def move_made(message):
  			emit('move made', {'session_name' : "computer", 'move' : comploc, 'move_value' : "O", 'game_id' : game_id})
 
  			if isFull(comp_newboard):
- 				emit('game over', {'result' : 'Game is a draw'}, broadcast=True)
+ 				emit('game over', {'result' : 'Game is a draw', 'winloc' : [0,0,0]}, broadcast=True)
  				winner = 'Draw'
  				dbuser1 = dbsession.query(User).filter_by(socketid=request.namespace.socket.sessid).first()
  				game = dbsession.query(Game).filter_by(id=game_id)
  				game.update({ "usr1" : dbuser1.username, "usr2" : 'Computer', "winner" : 'Draw' }) 
 
  			elif isWinner(comp_newboard, "O"):
- 				emit('game over', {'result' : 'Computer wins the game'})
+ 				winloc = getWinningloc(newboard, "O")
+ 				emit('game over', {'result' : 'Computer wins the game', 'winloc' : winloc})
  				dbuser1 = dbsession.query(User).filter_by(socketid=request.namespace.socket.sessid).first()
  				game = dbsession.query(Game).filter_by(id=game_id)
  				game.update({ "usr1" : dbuser1.username, "usr2" : 'Computer', "winner" : 'Computer' }) 		
@@ -141,6 +148,7 @@ def move_made(message):
 
 @socketio.on('get reports', namespace='/test')
 def create_db_reports(message):
+	global client_count
 
 	clients = socketio.rooms.get('/test', {}).get('game', set())
 
@@ -158,24 +166,29 @@ def create_db_reports(message):
 			display_results[usr2] = 0;
 		if not 'Draw' in display_results:
 			display_results['Draw'] = 0;
+		emit('display results', display_results)
 	else:
-		dbuser1 = dbsession.query(User).filter_by(socketid=request.namespace.socket.sessid).first()
-		for socket in clients:
-				if socket != request.namespace:
-					dbuser2 = dbsession.query(User).filter_by(socketid=socket.socket.sessid).first()
-		results = dbsession.query(Game).filter_by(usr1=dbuser1.username).filter_by(usr2=dbuser2.username).all()
-		display_results = create_results_dict(results)
-		print display_results
-		#if only one game is played, the results are zero for a draw case and for other user
-		if not dbuser1.username in display_results:
-			display_results[dbuser1.username] = 0;
-		if not dbuser2.username in display_results:
-			display_results[dbuser2.username] = 0;
-		if not 'Draw' in display_results:
-			display_results['Draw'] = 0;
-	
-	emit('display results', display_results, broadcast=True)
-
+		client_count += 1
+		if(client_count == 2):
+			dbuser1 = dbsession.query(User).filter_by(socketid=request.namespace.socket.sessid).first()
+			print "dbuser1:", dbuser1.username
+			for socket in clients:
+					if socket != request.namespace:
+						dbuser2 = dbsession.query(User).filter_by(socketid=socket.socket.sessid).first()
+						print "dbuser2:", dbuser2.username
+			#results = dbsession.query(Game).filter_by(usr1=dbuser1.username).filter_by(usr2=dbuser2.username).all()
+			results = dbsession.query(Game).filter(((Game.usr1==dbuser1.username) | (Game.usr1==dbuser2.username)) & ((Game.usr2==dbuser1.username) | (Game.usr2==dbuser2.username))).all()
+			print "results:", results
+			display_results = create_results_dict(results)
+			print display_results
+			#if only one game is played, the results are zero for a draw case and for other user
+			if not dbuser1.username in display_results:
+				display_results[dbuser1.username] = 0;
+			if not dbuser2.username in display_results:
+				display_results[dbuser2.username] = 0;
+			if not 'Draw' in display_results:
+				display_results['Draw'] = 0;
+			emit('display results', display_results, broadcast=True)
 
 @socketio.on('create or join room', namespace='/test')
 def create_join_room(message):

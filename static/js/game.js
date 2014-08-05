@@ -13,13 +13,6 @@ $(document).ready(function() {
         my_move = false;
     });
 
-      // var context = $('#game-canvas')[0].getContext('2d');
-
-      // context.beginPath();
-      // context.moveTo(0, 0);
-      // context.lineTo(600, 300);
-      // context.stroke();
-
 });
 
 function clear_game_board() {
@@ -40,6 +33,9 @@ function game_socket_events() {
     });
 
     socket.on('game over', function(message) {
+
+            strike_winloc(message['winloc']);
+
             var gameover = message['result'];
             $('#endModal-body-id').html(gameover);
             $('#endModal-footer-id').html('<button type="button" class="btn btn-default" name="playagain" id="playAgain">Play Again?</button>' +
@@ -48,6 +44,11 @@ function game_socket_events() {
             socket.emit('get reports', {'two_players' : two_players});
 
             $('#playAgain').click( function(e) {
+                //clear the board canvas
+                var context = $('#game-canvas')[0].getContext('2d');
+                context.clearRect(0, 0, 300, 300);
+                $("#game-canvas").css({display : 'none'});
+
                 console.log("clicked play again");
                 my_move = true;
                 game_id = 0;
@@ -88,6 +89,76 @@ $('canvas')     -> multiple
 $('.my-class')  -> multiple
 */
 
+function strike_winloc(loclist) {
+
+    $("#game-canvas").css({display : 'block'});
+ 
+    var context = $('#game-canvas')[0].getContext('2d');
+
+    if (arraysIdentical(loclist, [1, 2, 3])) {
+        startx = 50;
+        starty = 250;
+        endx = 250;
+        endy = 250;
+    } else if (arraysIdentical(loclist, [4, 5, 6])) {
+        startx = 50;
+        starty = 150;
+        endx = 250;
+        endy = 150;
+    } else if (arraysIdentical(loclist, [7, 8, 9])) {
+        startx = 50;
+        starty = 50;
+        endx = 250;
+        endy = 50;
+    } else if (arraysIdentical(loclist, [1, 4, 7])) {
+        startx = 50;
+        starty = 250;
+        endx = 50;
+        endy = 50;
+    } else if (arraysIdentical(loclist, [2, 5, 8])) {
+        startx = 150;
+        starty = 250;
+        endx = 150;
+        endy = 50;
+    } else if (arraysIdentical(loclist, [3, 6, 9])) {
+        startx = 250;
+        starty = 250;
+        endx = 250;
+        endy = 50;
+    } else if (arraysIdentical(loclist, [1, 5, 9])) {
+        startx = 50;
+        starty = 250;
+        endx = 250;
+        endy = 50;
+    } else if (arraysIdentical(loclist, [3, 5, 7])) {
+        startx = 250;
+        starty = 250;
+        endx = 50;
+        endy = 50;
+    } else {
+        startx = 0;
+        starty = 0;
+        endx = 0;
+        endy = 0;
+    }
+
+    context.beginPath();
+    context.moveTo(startx, starty);
+    context.lineTo(endx, endy);
+    context.lineWidth = 5;
+    context.strokeStyle = '#ff0000';
+    context.stroke();
+
+}
+
+function arraysIdentical(a, b) {
+    var i = a.length;
+    if (i != b.length) return false;
+    while (i--) {
+        if (a[i] !== b[i]) return false;
+    }
+    return true;
+};
 
 
 function chart_results(message) {

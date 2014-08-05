@@ -91,6 +91,21 @@ def isWinner(b, l):
             (b[1] == l and b[5] == l and b[9] == l) or
             (b[3] == l and b[5] == l and b[7] == l))
 
+def getWinningloc(b,l):
+    loclist = []
+
+    if (b[1] == l and b[2] == l and b[3] == l): loclist = [1,2,3]
+    elif (b[4] == l and b[5] == l and b[6] == l): loclist = [4,5,6]
+    elif (b[7] == l and b[8] == l and b[9] == l): loclist = [7,8,9]
+    elif (b[1] == l and b[4] == l and b[7] == l): loclist = [1,4,7]
+    elif (b[2] == l and b[5] == l and b[8] == l): loclist = [2,5,8]
+    elif (b[3] == l and b[6] == l and b[9] == l): loclist = [3,6,9]
+    elif (b[1] == l and b[5] == l and b[9] == l): loclist = [1,5,9]
+    elif (b[3] == l and b[5] == l and b[7] == l): loclist = [3,5,7]
+    else: loclist = [0,0,0]
+
+    return loclist
+
 def isFull(b):
     return (b[1] != '' and b[2] != '' and b[3] != '' and b[4] != '' and
             b[5] != '' and b[6] != '' and b[7] != '' and b[8] != '' and b[9] != '')
