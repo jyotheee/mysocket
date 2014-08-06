@@ -22,11 +22,12 @@
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header" id="modal-header-id">
-            <h4 class="modal-title">Let's play Tic-Tac-Toe</h4>
+            <h3 class="modal-title">Play in realtime with WebRTC</h3>
           </div>
           <div class="modal-body" id="modal-body-id">
-            <p>Play TicTacToe in real time</p>
-            <p>Enter your username</p>
+            <h4>Tic-Tac-Toe</h4>
+            <br>
+            <h5>Enter your username</h5>
             <input id="username" type="text" placeholder="your name" value=""/>
           </div>
           <div class="modal-footer" id="modal-footer-id">
@@ -53,10 +54,10 @@
           
           <div class="modal-header" id="resultModal-header-id">
             <h4 class="modal-title">Thanks for playing!</h4>
-            <h5>Results:</h5>
           </div>         
           
           <div class="modal-body" id="resultModal-body-id">
+            <h5>Results:</h5>
             <div id="canvas-holder">
               <canvas id="chart-area" width="300" height="300" style="margin: 0 auto; display: block;"></canvas>
             </div>
@@ -69,13 +70,16 @@
 
   <div id='container'>
     
-    <nav class="navbar navbar-default" role="navigation" class="col-xs-12">
-      <div id="dashboard">
-        <div id="dashuser" class="col-xs-4"></div>
-        <div id="dashroom" class="col-xs-4"></div>
-        <div id="dashmessage" class="col-xs-4">dashmessage</div>
+    <div class="container-fluid">
+      <div class="row">
+        <nav class="navbar navbar-default" role="navigation" class="col-xs-12">
+          <div id="dashboard" class="col-xs-12" style="margin-top: 10px">
+            <div id="dashuser" class="col-xs-4" style="font-size: medium; text-align: left"></div>
+            <div id="dashmessage" class="col-xs-8" style="font-size: medium; text-align: right"></div>
+          </div>
+        </nav>
       </div>
-    </nav>
+    </div>
 
   <div class="container-fluid">
     <div id="maingame" class="row" style="margin-top: 100px">
@@ -108,8 +112,8 @@
         <div class="row">
           <div id='videos' class="col-xs-12">
             <div style="position: relative; margin: 0 auto; width: 400px; height: 300px;">
-              <video id='localVideo' poster="/static/images/video.jpg" style="width: 400px; height: 300px; position: absolute; right: 0; bottom: 0" autoplay muted></video>
-              <video id='remoteVideo' style="width: 133px; height: 100px;  position: absolute; right: 0; bottom: 0" autoplay></video>
+              <video id='remoteVideo' poster="/static/images/video.jpg" style="width: 400px; height: 300px; position: absolute; right: 0; bottom: 0" autoplay muted></video>
+              <video id='localVideo' style="width: 133px; height: 100px;  position: absolute; right: 0; bottom: 0" autoplay></video>
             </div>
           </div>
         </div>
@@ -146,12 +150,11 @@
         console.log('username is', player_name);
         askforplayers(player_name);
         $('#dashuser').html(player_name);
-        $('#dashroom').html(room);
       }
     });
 
     function askforplayers(player_name) {
-      $('#modal-header-id').html("Please select the number of players");
+      $('#modal-header-id').html("<h3>Select the number of players</h3>");
       $('#modal-body-id').html('<button type="button" class="btn btn-default" name="two_players" id="playerOne" value="false">One Player</button><p></p><button type="button" class="btn btn-default" name="two_players" id="playerTwo" value="true">Two Players</button>');
        
       $('#playerOne').click( function() {

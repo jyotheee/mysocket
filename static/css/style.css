@@ -1,4 +1,16 @@
+.modal-dialog {
+	margin-top: 10%;
+}
 
+#nameEntryModal {
+	text-align: center;
+	color: #782821;
+}
+
+.btn {
+	font-size: medium;
+
+}
 
 #localVideo {
   width: 40%;
@@ -12,8 +24,8 @@
 
 .navbar {
 	width : 100%;
-	height: 20px;
-	background-color: black;
+	height: 50px;
+	background-color: #030E51;
 	color: white;
 	border-color: black;
 }

@@ -38,8 +38,8 @@ function game_socket_events() {
 
             var gameover = message['result'];
             $('#endModal-body-id').html(gameover);
-            $('#endModal-footer-id').html('<button type="button" class="btn btn-default" name="playagain" id="playAgain">Play Again?</button>' +
-                '<button type="button" class="btn btn-default" name="endgame" id="endGame">Done?</button>');
+            $('#endModal-footer-id').html('<button type="button" class="btn btn-default" name="playagain" id="playAgain">Play Again</button>' +
+                '<button type="button" class="btn btn-default" name="endgame" id="endGame">Done</button>');
             $('#endModal').modal('show');
             socket.emit('get reports', {'two_players' : two_players});
 
