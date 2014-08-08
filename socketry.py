@@ -23,8 +23,9 @@ def test_connect():
 
 
 @socketio.on('disconnect', namespace='/test')
-def test_disconnect():
-    print('Client disconnected')
+def test_disconnect(message):
+	leave_room(message['room'])
+	print 'Client disconnected:' + session['user']
 
 @socketio.on('get media', namespace='/test')
 def get_media_from_all_clients():
@@ -105,7 +106,7 @@ def move_made(message):
 		winloc = getWinningloc(newboard, message['position_value'])
 	 	dbuser1 = dbsession.query(User).filter_by(socketid=request.namespace.socket.sessid).first()
 	 	winner = dbuser1.username
-	 	emit('game over', {'result' : 'you win the game', 'winloc' : winloc})
+	 	emit('game over', {'result' : 'You win the game', 'winloc' : winloc})
 	 	if message['two_players'] == False:
 			usr2 = 'Computer'
 			game = dbsession.query(Game).filter_by(id=game_id)
@@ -116,7 +117,7 @@ def move_made(message):
 					dbuser2 = dbsession.query(User).filter_by(socketid=socket.socket.sessid).first()
 					game = dbsession.query(Game).filter_by(id=game_id)
 					game.update({"usr1" : dbuser1.username, "usr2" : dbuser2.username, "winner" : winner})
-					socket.emit('game over', {'result' : 'you lose the game', 'winloc' : winloc})
+					socket.emit('game over', {'result' : 'You lose the game', 'winloc' : winloc})
 		dbsession.commit()
 
 	else: 	#single player game with comp

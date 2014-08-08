@@ -70,6 +70,7 @@ function game_socket_events() {
             });
 
             $('#resultModal').modal('show');
+            socket.emit('disconnect', {'room' : room});
         });
     });
 
