@@ -5,3 +5,4 @@ playWithRTC is an exploration of realtime communication/colloboration across dev
 
 WebRTC is a definition drafted by WorldWideWeb Consortium to enable peer-to-peer applications for voice calling, video chat and point-to-point file sharing. Applications can be developed using standard web environments such as Javascript APIs, HTML5 and do not require download and installation of plugins.
 
+https://cloud.githubusercontent.com/assets/7797949/3860124/ed212524-1f20-11e4-988e-c365e85f8fe4.png
