@@ -9,6 +9,7 @@ WebRTC is a definition drafted by WorldWideWeb Consortium to enable peer-to-peer
 ### Technologies:
 
 Front-end: Javascript, jQuery, HTML5, CSS, Javascript APIs for WebRTC, chartJS 
+
 Back-end: Flask-SocketIO, Python (AI of Tic-Tac-Toe), SQLite3, SQLAlchemy
 
 ### Demo:
@@ -23,5 +24,7 @@ Back-end: Flask-SocketIO, Python (AI of Tic-Tac-Toe), SQLite3, SQLAlchemy
 ### WebRTC references:
 
 [WebRTC basics](http://www.html5rocks.com/en/tutorials/webrtc/basics/)
+
 [Flask-SocketIO basics](http://blog.miguelgrinberg.com/post/easy-websockets-with-flask-and-gevent)
+
 [Flask-SocketIO library](http://flask-socketio.readthedocs.org/en/latest/)
