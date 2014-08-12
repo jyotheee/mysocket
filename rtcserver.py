@@ -141,8 +141,6 @@ def move_made(message):
 @socketio.on('get reports', namespace='/test')
 def create_db_reports(message):
 
-	clients = get_clients_in_room()
-
 	#if the user is playing with computer
 	if message['two_players'] == False:
 		usr1 = session['user']
@@ -157,11 +155,8 @@ def create_db_reports(message):
 
 	#if user is playing with another person
 	else: 
-		dbuser1 = dbsession.query(User).filter_by(socketid=request.namespace.socket.sessid).first()
-		for socket in clients:
-			if socket != request.namespace:
-				dbuser2 = dbsession.query(User).filter_by(socketid=socket.socket.sessid).first()
-
+		dbuser1 = dbuser1_get_first_socket()
+		dbuser2 = dbuser2_get_second_socket()
 		results = dbsession.query(Game).filter(((Game.usr1==dbuser1.username) | (Game.usr1==dbuser2.username)) & ((Game.usr2==dbuser1.username) | (Game.usr2==dbuser2.username))).all()
 		display_results = create_results_dict(results)
 
