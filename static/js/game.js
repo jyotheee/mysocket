@@ -4,7 +4,8 @@ var game_id = 0; //first game id is 0 and the server assigns a new game id
 
 $(document).ready(function() {
     $(".tt-column").click( function() {
-        if(!my_move) return
+        if(!my_move) return;
+        
         var x = parseInt($( this ).attr("data-value"));
         console.log("User position is...", x);
         console.log("Move letter is....", move_letter);
@@ -12,56 +13,59 @@ $(document).ready(function() {
         socket.emit('game move', {'position' : x, 'position_value' : move_letter, 'two_players' : two_players, 'game_id' : game_id});
         my_move = false;
     });
-
 });
 
+//clear the game board when the user clicks 'Play Again'
 function clear_game_board() {
     $('.tt-column').each( function() {
         $(this).html('');
     });
 }
 
+//update the UI with the incoming messages from the server
 function game_socket_events() {
-
+    //update UI with incoming game move
     socket.on('move made', function(message) {
-            $("[data-value=" + message['move'] + "]").html(message['move_value']);
-            move_letter = (message['move_value'] == "X" ? "O" : "X");
-            my_move = true;
-            game_id = message['game_id'];
-            console.log("Move made by", message['session_name']);
-            console.log("Game ID is", message['game_id']);
+        $("[data-value=" + message['move'] + "]").html(message['move_value']);
+        move_letter = (message['move_value'] == "X" ? "O" : "X");
+        my_move = true;
+        game_id = message['game_id'];
+        console.log("Move made by", message['session_name']);
+        console.log("Game ID is", message['game_id']);
     });
 
+    //When the game is over, display a modal that lets the user choose between 'PlayAgain' and 'Done'
     socket.on('game over', function(message) {
 
-            strike_winloc(message['winloc']);
+        strike_winloc(message['winloc']);
 
-            var gameover = message['result'];
-            $('#endModal-body-id').html(gameover);
-            $('#endModal-footer-id').html('<button type="button" class="btn btn-default" name="playagain" id="playAgain">Play Again</button>' +
-                '<button type="button" class="btn btn-default" name="endgame" id="endGame">Done</button>');
-            $('#endModal').modal('show');
-            socket.emit('get reports', {'two_players' : two_players});
+        var gameover = message['result'];
+        $('#endModal-body-id').html(gameover);
+        $('#endModal-footer-id').html('<button type="button" class="btn btn-default" name="playagain" id="playAgain">Play Again</button>' +
+            '<button type="button" class="btn btn-default" name="endgame" id="endGame">Done</button>');
+        $('#endModal').modal('show');
+        socket.emit('get reports', {'two_players' : two_players});
 
-            $('#playAgain').click( function(e) {
-                //clear the board canvas
-                var context = $('#game-canvas')[0].getContext('2d');
-                context.clearRect(0, 0, 300, 300);
-                $("#game-canvas").css({display : 'none'});
+        $('#playAgain').click( function(e) {
+            //clear the board canvas
+            var context = $('#game-canvas')[0].getContext('2d');
+            context.clearRect(0, 0, 300, 300);
+            $("#game-canvas").css({display : 'none'});
 
-                console.log("clicked play again");
-                my_move = true;
-                game_id = 0;
-                move_letter = "X";
-                clear_game_board();
-                $('#endModal').modal('hide');
-            });
+            console.log("clicked play again");
+            my_move = true;
+            game_id = 0;
+            move_letter = "X";
+            clear_game_board();
+            $('#endModal').modal('hide');
+        });
 
-            $('#endGame').click( function(e) {
-                $('#endModal').modal('hide');
-            });
+        $('#endGame').click( function(e) {
+            $('#endModal').modal('hide');
+        });
     });
-
+    
+    //create visualization of game results on chartjs
     socket.on('display results', function(message) {
         console.log("Display results is", message);
         $('#endGame').click( function(e) {
@@ -70,7 +74,6 @@ function game_socket_events() {
             });
 
             $('#resultModal').modal('show');
-            socket.emit('disconnect', {'room' : room});
         });
     });
 
@@ -80,16 +83,7 @@ function game_socket_events() {
 
 }
 
-/*
-document.getElementById('my-id') -> 1 elem
-document.getElementsByTagName('canvas') -> multiple
-document.getElementsByClassName('my-class') -> multiple
-
-$('#my-id')     -> multiple
-$('canvas')     -> multiple
-$('.my-class')  -> multiple
-*/
-
+//update the gameboard UI with a line crossing out the winning combination
 function strike_winloc(loclist) {
 
     $("#game-canvas").css({display : 'block'});
@@ -152,6 +146,7 @@ function strike_winloc(loclist) {
 
 }
 
+//determine if two arrays are identical
 function arraysIdentical(a, b) {
     var i = a.length;
     if (i != b.length) return false;
@@ -159,9 +154,9 @@ function arraysIdentical(a, b) {
         if (a[i] !== b[i]) return false;
     }
     return true;
-};
+}
 
-
+//chartJS API for data visualization
 function chart_results(message) {
     labels = [];
 

@@ -151,10 +151,10 @@ def compMove(board):
 def create_results_dict(results):
     results_dict = {}
     for eachgame in results:
-            if eachgame.winner in results_dict:
-                results_dict[eachgame.winner] += 1
-            else:
-                results_dict[eachgame.winner] = 1
+        if eachgame.winner in results_dict:
+            results_dict[eachgame.winner] += 1
+        else:
+            results_dict[eachgame.winner] = 1
     return results_dict
 
 def main():
