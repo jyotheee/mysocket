@@ -14,16 +14,18 @@ global play
 def index():
 	return render_template("index.html")
 
+# socket route that responds to a client connection
 @socketio.on('connect', namespace='/test')
 def test_connect():
 	emit('log', {'data': 'Connected', 'count': 0})
 	emit('my response')
 
+# socket route that responds when a client gets disconnected (browser close)
 @socketio.on('disconnect', namespace='/test')
 def test_disconnect():
 	print 'Client disconnected:' + session['user']
 
-# todo comment this fn
+# socket route that setups the usermedia for all clients connected to server
 @socketio.on('get media', namespace='/test')
 def get_media_from_all_clients():
 	clients = get_clients_in_room()
@@ -33,14 +35,13 @@ def get_media_from_all_clients():
 			socket.emit('get media')
 			emit('dashlog', 'Accessing media from other player')
 
-# todo comment this
+# socket route that broadcasts an RTC message to all clients connected to the server
 @socketio.on('message', namespace='/test')
 def handle_message(message):
 	print('Message received on server:', message)
 	emit('message', message, broadcast=True)
 
-# todo comment this
-# todo try to simplify this by splitting this into smaller functions
+# socket route that responds whenever a client makes a game move
 @socketio.on('game move', namespace='/test')
 def move_made(message):
 	global play
@@ -136,6 +137,7 @@ def move_made(message):
  				
  	print "new board is %r", newboard
 
+# socket route that generates the game analytics at the end of the game
 @socketio.on('get reports', namespace='/test')
 def create_db_reports(message):
 
@@ -170,6 +172,7 @@ def create_db_reports(message):
 	
 	emit('display results', display_results, broadcast=True)
 
+# socket route that adds a client to a game room on the server
 @socketio.on('create or join room', namespace='/test')
 def create_join_room(message):
 	print ("create join room route in the server")
